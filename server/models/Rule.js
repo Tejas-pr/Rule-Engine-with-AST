@@ -1,18 +1,19 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const ruleSchema = new mongoose.Schema({
     ruleString: {
-        type: String,
+        type: String, // Save the rule in string format
         required: true
     },
     ast: {
-        type: Object,
+        type: Object, // Save the AST as an object
         required: true
     },
-    createdDate: {
+    createdAt: {
         type: Date,
         default: Date.now
     }
 });
 
-module.exports = mongoose.model("Rule", ruleSchema);
+const Rule = mongoose.model('Rule', ruleSchema);
+module.exports = Rule;
