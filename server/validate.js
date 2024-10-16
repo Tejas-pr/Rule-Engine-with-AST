@@ -1,18 +1,24 @@
-// validation the input 
 const { z } = require('zod');
 
-//creatinf rule
+// Schema for creating a rule
 const createRuleSchema = z.object({
-    rule: z.string().nonempty("Rule must be non-empty String")
+    rule: z.string().nonempty("Rule must be a non-empty string")
 });
 
-//evaluate Rule
+// Schema for evaluating a rule
+const astNodeSchema = z.object({
+    type: z.enum(['operator', 'operand']),
+    left: z.union([z.lazy(() => astNodeSchema), z.null()]), // Can be another AST node or null
+    right: z.union([z.lazy(() => astNodeSchema), z.null()]), // Can be another AST node or null
+    value: z.string().nonempty(),
+});
+
 const evaluateRuleSchema = z.object({
-    ast: z.object(),
-    data: z.record(z.string(), z.union([z.string(), z.number()]))
+    ast: astNodeSchema, // Validate that 'ast' follows the defined structure
+    data: z.record(z.string(), z.union([z.string(), z.number()])) // Validate 'data' as key-value pairs
 });
 
 module.exports = {
     createRuleSchema,
     evaluateRuleSchema
-}
+};
