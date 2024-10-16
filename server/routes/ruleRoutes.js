@@ -2,13 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Node = require("../models/Node");
 const Rule = require("../models/Rule");
-const { createRuleSchema, evaluateRuleSchema } = require("../validate"); // Import the schemas
+const { createRuleSchema, evaluateRuleSchema, modifyRuleSchema} = require("../validate"); // Import the schemas
 
 const validAttributes = ["age", "department", "salary", "experience"];
 
-// Function for createAST
 function createAST(rule) {
-    // Parsing logic for AND and OR
     if (rule.includes("AND")) {
         const parts = rule.split("AND");
         const left = createAST(parts[0].trim());
@@ -20,7 +18,6 @@ function createAST(rule) {
         const right = createAST(parts[1].trim());
         return new Node("operator", left, right, "OR");
     } else {
-        // Handle individual conditions
         const match = rule.match(/([\w\s]+)\s*(>=|<=|!=|[><=]+)\s*([\w\s'"]+)/);
         if (match) {
             const [_, attribute, operator, value] = match;
@@ -30,7 +27,6 @@ function createAST(rule) {
     }
 }
 
-// Function to evaluate AST against user data
 function evaluateAST(node, data) {
     if (!node) return false;
 
@@ -39,7 +35,6 @@ function evaluateAST(node, data) {
         if (!validAttributes.includes(attr)) {
             throw new Error(`Invalid attribute: ${attr}`);
         }
-        // Handle comparisons based on operator
         if (operator === ">") return data[attr] > parseInt(value);
         if (operator === "=") return data[attr] === value.replace(/['"]+/g, "");
     } else if (node.type === "operator") {
@@ -52,9 +47,7 @@ function evaluateAST(node, data) {
     return false;
 }
 
-// Create a rule API
 router.post("/create-rule", async (req, res) => {
-    // Validate the incoming request body
     const ValidRule = createRuleSchema.safeParse(req.body);
     if (!ValidRule.success) {
         return res.status(400).json({
@@ -62,34 +55,25 @@ router.post("/create-rule", async (req, res) => {
         });
     }
 
-    // Decode the rule
     const ruleString = ValidRule.data.rule;
 
     try {
-        // Create AST from the rule string
         const ast = createAST(ruleString);
 
-        // Create a new Rule instance
         const newRule = new Rule({
             ruleString: ruleString,
             ast: ast,
         });
 
-        await newRule.save(); // Save the rule to the database
+        await newRule.save();
 
-        // Return the AST in the response
         res.json({ ast });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
-// Evaluate a rule against the data
 router.post("/evaluate-rule", (req, res) => {
-    // Log the incoming request body for debugging
-    console.log("Incoming Request Body:", req.body);
-
-    // Validate the incoming request body
     const validRules = evaluateRuleSchema.safeParse(req.body);
     if (!validRules.success) {
         return res.status(400).json({
@@ -97,14 +81,8 @@ router.post("/evaluate-rule", (req, res) => {
         });
     }
 
-    // Destructure ast and data from the validated request body
     const { ast, data } = validRules.data;
 
-    // Log ast and data for verification
-    console.log("AST:", ast);
-    console.log("Data:", data);
-
-    // Check if 'data' has valid attributes
     for (const key in data) {
         if (!validAttributes.includes(key)) {
             return res.status(400).json({
@@ -113,14 +91,40 @@ router.post("/evaluate-rule", (req, res) => {
         }
     }
 
-    // Evaluation function
     try {
-        const result = evaluateAST(ast, data); // Evaluate the AST with data
+        const result = evaluateAST(ast, data);
         res.json({ result });
     } catch (error) {
         return res.status(400).json({
             error: error.message,
         });
+    }
+});
+
+// Modify an existing rule
+router.post('/modify-rule', async (req, res) => {
+    const validationResult = modifyRuleSchema.safeParse(req.body);
+    if (!validationResult.success) {
+        return res.status(400).json({ errors: validationResult.error.errors });
+    }
+
+    const { ruleId, newRuleString } = validationResult.data;
+
+    try {
+        const newAst = createAST(newRuleString);
+        await Rule.findByIdAndUpdate(ruleId, { ruleString: newRuleString, ast: newAst }, { new: true });
+        res.json({ message: 'Rule updated successfully', newAst });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.get("/get-all-rules", async (req, res) => {
+    try {
+        const rules = await Rule.find();
+        res.json(rules);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 });
 

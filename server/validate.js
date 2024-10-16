@@ -18,7 +18,14 @@ const evaluateRuleSchema = z.object({
     data: z.record(z.string(), z.union([z.string(), z.number()])) // Validate 'data' as key-value pairs
 });
 
+// Schema for modifying a rule
+const modifyRuleSchema = z.object({
+    ruleId: z.string().length(24, "Invalid rule ID"), // Ensure the rule ID is a string of length 24 (for MongoDB ObjectIDs)
+    newRuleString: z.string().nonempty("New rule must be a non-empty string"),
+});
+
 module.exports = {
     createRuleSchema,
-    evaluateRuleSchema
+    evaluateRuleSchema,
+    modifyRuleSchema
 };
