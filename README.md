@@ -21,7 +21,7 @@ This project uses the following dependencies:
 - **Mongoose**: ODM library for MongoDB and Node.js
 - **Cors**: Package to enable CORS (Cross-Origin Resource Sharing)
 - **Zod**: Type-safe schema declaration and validation library
-- **.enc**: Reducing the need for manual configuration
+- **.env**: Reducing the need for manual configuration
 
 ## Setup Instructions
 
