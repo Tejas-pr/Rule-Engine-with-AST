@@ -119,7 +119,7 @@ router.post('/modify-rule', async (req, res) => {
     }
 });
 
-router.get("/get-all-rules", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const rules = await Rule.find();
         res.json(rules);
