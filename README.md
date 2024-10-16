@@ -59,6 +59,10 @@ npm run dev
 The server will run on http://localhost:5000/${routes}
 
 ## API Endpoints - Postman
+```postman
+<!-- postman route collection -->
+https://www.postman.com/science-participant-14299000/sharing-postman/collection/jt4it0k/rule-engine-with-ast
+```
 
 Create Rule :
 
@@ -121,7 +125,6 @@ Get All Rules :
 - Endpoint: GET /rules ( http://localhost:5000/rules )
 
 ##
-
-Thank You!  
+**Thank You!**  👋  
 tejas.teju02@gmail.com  
 +91 9538632743
