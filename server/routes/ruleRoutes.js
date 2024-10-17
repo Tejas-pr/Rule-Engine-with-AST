@@ -6,7 +6,7 @@ const {
   createRuleSchema,
   evaluateRuleSchema,
   modifyRuleSchema,
-} = require("../validate"); // Import the schemas
+} = require("../validate");
 
 const validAttributes = ["age", "department", "salary", "experience"];
 
@@ -30,7 +30,7 @@ function createAST(rule) {
         null,
         null,
         `${attribute} ${operator} ${value}`
-      ); // Keep value as a single string
+      );
     }
     throw new Error("Invalid rule format");
   }
@@ -46,7 +46,6 @@ function evaluateAST(node, data) {
       throw new Error(`Invalid attribute: ${attr}`);
     }
 
-    // Parse the value correctly (assuming it's a number, or handle it as string)
     const parsedValue = isNaN(value)
       ? value.replace(/['"]+/g, "")
       : parseFloat(value);
@@ -113,7 +112,6 @@ router.post("/evaluate-rule", (req, res) => {
 
   const { ast, data } = validRules.data;
 
-  // Validate that all attributes in the data are valid
   for (const key in data) {
     if (!validAttributes.includes(key)) {
       return res.status(400).json({
@@ -123,9 +121,8 @@ router.post("/evaluate-rule", (req, res) => {
   }
 
   try {
-    // Evaluate the AST with the provided data
     const result = evaluateAST(ast, data);
-    res.json({ result }); // Return the evaluation result
+    res.json({ result });
   } catch (error) {
     return res.status(400).json({
       error: error.message,
