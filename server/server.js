@@ -1,18 +1,24 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const config = require("./config");
 const ruleRoutes = require("./routes/ruleRoutes");
+require('dotenv').config();
 
 const app = express();
 const cors = require('cors');
 
-app.use(cors());
+
 app.use(express.json());
+app.use(cors({
+  origin: process.env.allowed_origin,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use("/rules", ruleRoutes);
 
 mongoose
-  .connect(config.connectionString)
+  .connect()
   .then(() => {
     console.log("MongoDB connected successfully");
     
