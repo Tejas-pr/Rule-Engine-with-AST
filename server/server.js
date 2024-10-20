@@ -18,7 +18,7 @@ app.use(cors({
 app.use("/rules", ruleRoutes);
 
 mongoose
-  .connect()
+  .connect(process.env.connectionString)  
   .then(() => {
     console.log("MongoDB connected successfully");
     
